@@ -1,0 +1,3 @@
+[submodule "gl4cpp/glfw"]
+	path = gl4cpp/glfw
+	url = https://github.com/glfw/glfw.git
