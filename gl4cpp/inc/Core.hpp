@@ -2,51 +2,92 @@
 #ifndef CORE_HPP
 # define CORE_HPP
 
+#ifndef GLFW_INCLUDE_GLCOREARB
 # define GLFW_INCLUDE_GLCOREARB
+#endif
+#ifndef GLFW_INCLUDE_GLEXT
 # define GLFW_INCLUDE_GLEXT
+#endif
 
 # include <iostream>
-# include <ostream>
-# include <sstream>
-# include <fstream>
-# include <sys/stat.h>
 # include <GLFW/glfw3.h>
 # include "Vec3.hpp"
 # include "Utils.hpp"
 # include "Bmp.hpp"
 
-# define BUFSIZE			8192
-
 class Core
 {
 public:
+	/*
+	** Window
+	*/
 	GLFWwindow				*window;
 	int						windowWidth;
 	int						windowHeight;
+
+	/*
+	** Matrices
+	*/
 	float					projMatrix[16];
 	float					viewMatrix[16];
+
+	/*
+	** Camera
+	*/
 	Vec3<float>				cameraPos;
 	Vec3<float>				cameraLookAt;
+
+	/*
+	** Shaders
+	*/
+	GLuint					vertexShader;
+	GLuint					fragmentShader;
+	GLuint					program;
+
+	/*
+	** Locations
+	*/
+	GLuint					projLoc;
+	GLuint					viewLoc;
+
+	GLuint					positionLoc;
+	GLuint					colorLoc;
+
+	/*
+	** 3d Axes
+	*/
+	GLuint					axesVao;
+	GLuint					axesVbo;
 
 	Core(void);
 	~Core(void);
 
 	int						init(void);
-	int						printError(std::ostream &msg, int const &code);
-	int						printError(std::string const &msg, int const &code);
-	void *					printError(std::string const &msg);
-	std::string				getFileContents(std::string const &filename);
 	void					update(void);
 	void					render(void);
 	void					loop(void);
+
+	/* locations */
 	void					getLocations(void);
+
+	/* textures */
 	void					loadTextures(void);
 	GLuint					loadTexture(char const *filename);
-	char *					readFile(char const *filename);
+
+	/* shaders */
 	int						compileShader(GLuint shader, char const *filename);
 	GLuint					loadShader(GLenum type, char const *filename);
+	int						loadShaders(void);
+	void					attachShaders(void);
+	int						linkProgram(void);
+	void					deleteShaders(void);
+	int						initShaders(void);
 
-	/* matrix stuff */
+	/* 3d axes */
+	void					createAxes(void);
+	void					renderAxes(void);
+
+	/* matrices */
 	void					multiplyMatrix(float *a, float const *b);
 	void					setTranslationMatrix(float *translation, float const &x,
 												float const &y, float const &z);

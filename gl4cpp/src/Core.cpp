@@ -22,41 +22,6 @@ key_callback(GLFWwindow *window, int key, int scancode, int action, int mods)
 		glfwSetWindowShouldClose(window, GL_TRUE);
 }
 
-int
-Core::printError(std::ostream &msg, int const &code)
-{
-	std::cerr << dynamic_cast<std::ostringstream &>(msg).str() << std::endl;
-	return (code);
-}
-
-int
-Core::printError(std::string const &msg, int const &code)
-{
-	std::cerr << msg << std::endl;
-	return (code);
-}
-
-void *
-Core::printError(std::string const &msg)
-{
-	std::cerr << msg << std::endl;
-	return (0);
-}
-
-std::string
-Core::getFileContents(std::string const &filename)
-{
-	std::ifstream		in(filename, std::ios::in | std::ios::binary);
-	std::string			contents;
-
-	in.seekg(0, std::ios::end);
-	contents.resize(in.tellg());
-	in.seekg(0, std::ios::beg);
-	in.read(&contents[0], contents.size());
-	in.close();
-	return (contents);
-}
-
 GLuint
 Core::loadTexture(char const *filename)
 {
@@ -76,18 +41,6 @@ Core::loadTexture(char const *filename)
 	glGenerateMipmap(GL_TEXTURE_2D);
 	checkGlError(__FILE__, __LINE__);
 	return (texture);
-}
-
-void
-Core::loadTextures(void)
-{
-
-}
-
-void
-Core::getLocations(void)
-{
-
 }
 
 void
@@ -228,37 +181,6 @@ Core::setCamera(float *view, Vec3<float> const &pos, Vec3<float> const &lookAt)
 	this->multiplyMatrix(view, translation);
 }
 
-char *
-Core::readFile(char const *filename)
-{
-	struct stat		file_stat;
-	int				fd;
-	int				i;
-	int				j;
-	int				ret;
-	char			buf[BUFSIZE];
-	char			*file;
-
-	if ((fd = open(filename, O_RDONLY)) == -1)
-		return ((char *)printError("Failed to open file!"));
-	if (fstat(fd, &file_stat) == -1)
-		return ((char *)printError("Failed to retrieve file stat!"));
-	file = new char[file_stat.st_size + 1];
-	i = 0;
-	while ((ret = read(fd, buf, BUFSIZE)) != 0)
-	{
-		if (ret == -1)
-			return (close(fd), (char *)printError("Failed to read file!"));
-		j = 0;
-		while (j < ret)
-			file[i + j] = buf[j];
-		i += ret;
-	}
-	file[i] = '\0';
-	close(fd);
-	return (file);
-}
-
 int
 Core::compileShader(GLuint shader, char const *filename)
 {
@@ -303,6 +225,121 @@ Core::loadShader(GLenum type, char const *filename)
 }
 
 int
+Core::loadShaders(void)
+{
+	if (!(this->vertexShader = this->loadShader(GL_VERTEX_SHADER, "./shaders/vertex_shader.gls")))
+		return (printError("Failed to load vertex shader !", 0));
+	if (!(this->fragmentShader = this->loadShader(GL_FRAGMENT_SHADER, "./shaders/fragment_shader.gls")))
+		return (printError("Failed to load fragment shader !", 0));
+	return (1);
+}
+
+void
+Core::attachShaders(void)
+{
+	glAttachShader(this->program, this->vertexShader);
+	glAttachShader(this->program, this->fragmentShader);
+}
+
+int
+Core::linkProgram(void)
+{
+	GLint			logSize;
+	GLint			state;
+	char			*linkLog;
+
+	glLinkProgram(this->program);
+	glGetProgramiv(this->program, GL_LINK_STATUS, &state);
+	if (state != GL_TRUE)
+	{
+		glGetProgramiv(this->program, GL_INFO_LOG_LENGTH, &logSize);
+		linkLog = new char[logSize + 1];
+		memset(linkLog, '\0', logSize + 1);
+		glGetProgramInfoLog(this->program, logSize, &logSize, linkLog);
+		std::cerr	<< "Failed to link program !" << std::endl
+					<< linkLog;
+		delete [] linkLog;
+		return (0);
+	}
+	return (1);
+}
+
+void
+Core::deleteShaders(void)
+{
+	glDeleteShader(this->vertexShader);
+	glDeleteShader(this->fragmentShader);
+}
+
+int
+Core::initShaders(void)
+{
+	if (!loadShaders())
+		return (0);
+	if (!(this->program = glCreateProgram()))
+		return (printError("Failed to create program !", 0));
+	this->attachShaders();
+	glBindFragDataLocation(this->program, 0, "out_fragment");
+	if (!this->linkProgram())
+		return (0);
+	this->deleteShaders();
+	return (1);
+}
+
+void
+Core::loadTextures(void)
+{
+
+}
+
+void
+Core::getLocations(void)
+{
+	this->positionLoc = glGetAttribLocation(this->program, "position");
+	this->colorLoc = glGetAttribLocation(this->program, "vert_color");
+	this->projLoc = glGetUniformLocation(this->program, "proj_matrix");
+	this->viewLoc = glGetUniformLocation(this->program, "view_matrix");
+}
+
+void
+Core::createAxes(void)
+{
+	static GLfloat		axesVertices[18] =
+	{
+		0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
+		0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f,
+		0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f
+	};
+
+	glGenVertexArrays(1, &axesVao);
+	glBindVertexArray(axesVao);
+	glGenBuffers(1, &axesVbo);
+	glBindBuffer(GL_ARRAY_BUFFER, axesVbo);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 18, axesVertices, GL_STATIC_DRAW);
+
+	glEnableVertexAttribArray(positionLoc);
+	glVertexAttribPointer(positionLoc, 3, GL_FLOAT, GL_FALSE,
+						sizeof(GLfloat) * 6, (void *)0);
+
+	glEnableVertexAttribArray(colorLoc);
+	glVertexAttribPointer(colorLoc, 3, GL_FLOAT, GL_FALSE,
+						sizeof(GLfloat) * 6, (void *)(sizeof(GLfloat) * 3));
+/*
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, c->otest.vbo_ids[1]);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER,
+				sizeof(GLushort) * c->otest.indices_size * 3,
+				c->otest.indices, GL_STATIC_DRAW);
+*/
+	checkGlError(__FILE__, __LINE__);
+}
+
+void
+Core::renderAxes(void)
+{
+
+}
+
+int
 Core::init(void)
 {
 	this->windowWidth = 1920;
@@ -316,15 +353,17 @@ Core::init(void)
 		glfwTerminate();
 		return (0);
 	}
+	glfwMakeContextCurrent(this->window); // make the opengl context of the window current on the main thread
+	glfwSwapInterval(1); // VSYNC 60 fps max
+	glfwSetKeyCallback(this->window, key_callback);
+	if (!this->initShaders())
+		return (0);
 	this->loadTextures();
 	this->getLocations();
 	this->buildProjectionMatrix(this->projMatrix, 53.13f, 1.0f, 30.0f);
 	this->cameraPos.set(5.0f, 0.0f, 0.0f);
 	this->cameraLookAt.set(0.0f, 0.0f, 0.0f);
 	this->setCamera(this->viewMatrix, this->cameraPos, this->cameraLookAt);
-	glfwMakeContextCurrent(this->window); // make the opengl context of the window current on the main thread
-	glfwSwapInterval(1); // VSYNC 60 fps max
-	glfwSetKeyCallback(this->window, key_callback);
 	return (1);
 }
 
@@ -337,7 +376,10 @@ Core::update(void)
 void
 Core::render(void)
 {
-
+	glUseProgram(this->program);
+	glUniformMatrix4fv(this->projLoc, 1, GL_FALSE, this->projMatrix);
+	glUniformMatrix4fv(this->viewLoc, 1, GL_FALSE, this->viewMatrix);
+	checkGlError(__FILE__, __LINE__);
 }
 
 void

@@ -1,13 +1,5 @@
 
-#ifndef GLFW_INCLUDE_GLCOREARB
-# define GLFW_INCLUDE_GLCOREARB
-#endif
-#ifndef GLFW_INCLUDE_GLEXT
-# define GLFW_INCLUDE_GLEXT
-#endif
-
-#include <iostream>
-#include <GLFW/glfw3.h>
+#include "Utils.hpp"
 
 void
 checkGlError(std::string file, int line)
@@ -28,4 +20,70 @@ checkGlError(std::string file, int line)
 		else if (err == GL_OUT_OF_MEMORY)
 			std::cerr << "GL: Out of memory in " << file << " line " << line << std::endl;
 	}
+}
+
+char *
+readFile(char const *filename)
+{
+	struct stat		file_stat;
+	int				fd;
+	int				i;
+	int				j;
+	int				ret;
+	char			buf[BUFSIZE];
+	char			*file;
+
+	if ((fd = open(filename, O_RDONLY)) == -1)
+		return ((char *)printError("Failed to open file!"));
+	if (fstat(fd, &file_stat) == -1)
+		return ((char *)printError("Failed to retrieve file stat!"));
+	file = new char[file_stat.st_size + 1];
+	i = 0;
+	while ((ret = read(fd, buf, BUFSIZE)) != 0)
+	{
+		if (ret == -1)
+			return (close(fd), (char *)printError("Failed to read file!"));
+		j = 0;
+		while (j < ret)
+			file[i + j] = buf[j];
+		i += ret;
+	}
+	file[i] = '\0';
+	close(fd);
+	return (file);
+}
+
+int
+printError(std::ostream &msg, int const &code)
+{
+	std::cerr << dynamic_cast<std::ostringstream &>(msg).str() << std::endl;
+	return (code);
+}
+
+int
+printError(std::string const &msg, int const &code)
+{
+	std::cerr << msg << std::endl;
+	return (code);
+}
+
+void *
+printError(std::string const &msg)
+{
+	std::cerr << msg << std::endl;
+	return (0);
+}
+
+std::string
+getFileContents(std::string const &filename)
+{
+	std::ifstream		in(filename, std::ios::in | std::ios::binary);
+	std::string			contents;
+
+	in.seekg(0, std::ios::end);
+	contents.resize(in.tellg());
+	in.seekg(0, std::ios::beg);
+	in.read(&contents[0], contents.size());
+	in.close();
+	return (contents);
 }
