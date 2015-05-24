@@ -304,39 +304,42 @@ Core::getLocations(void)
 void
 Core::createAxes(void)
 {
-	static GLfloat		axesVertices[18] =
+	static GLfloat		axesVertices[36] =
 	{
-		0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
-		0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f,
-		0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f
+		0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
+		0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
+		0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f
 	};
+/*	static GLushort		axesIndices[6] =
+	{
+		0, 1,
+		0, 2,
+		0, 3
+	};*/
 
 	glGenVertexArrays(1, &axesVao);
 	glBindVertexArray(axesVao);
 	glGenBuffers(1, &axesVbo);
+	// bind vertices/colors vbo
 	glBindBuffer(GL_ARRAY_BUFFER, axesVbo);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 18, axesVertices, GL_STATIC_DRAW);
+	// create vertices/colors
+	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 36, axesVertices, GL_STATIC_DRAW);
 
+	// create pointer to vertices
 	glEnableVertexAttribArray(positionLoc);
-	glVertexAttribPointer(positionLoc, 3, GL_FLOAT, GL_FALSE,
-						sizeof(GLfloat) * 6, (void *)0);
+	glVertexAttribPointer(positionLoc, 3, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 3, (void *)0);
 
+	// create pointer to colors
 	glEnableVertexAttribArray(colorLoc);
-	glVertexAttribPointer(colorLoc, 3, GL_FLOAT, GL_FALSE,
-						sizeof(GLfloat) * 6, (void *)(sizeof(GLfloat) * 3));
+	glVertexAttribPointer(colorLoc, 3, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 3, (void *)(sizeof(GLfloat) * 3));
 /*
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, c->otest.vbo_ids[1]);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER,
-				sizeof(GLushort) * c->otest.indices_size * 3,
-				c->otest.indices, GL_STATIC_DRAW);
+	// bind indices vbo
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, axesVbo[1]);
+	// create the indices
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLushort) * 6, axesIndices, GL_STATIC_DRAW);
 */
+	// check for errors
 	checkGlError(__FILE__, __LINE__);
-}
-
-void
-Core::renderAxes(void)
-{
-
 }
 
 int
@@ -346,8 +349,8 @@ Core::init(void)
 	this->windowHeight = 1080;
 	if (!glfwInit())
 		return (0);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 	this->window = glfwCreateWindow(this->windowWidth, this->windowHeight,
@@ -360,21 +363,36 @@ Core::init(void)
 	glfwMakeContextCurrent(this->window); // make the opengl context of the window current on the main thread
 	glfwSwapInterval(1); // VSYNC 60 fps max
 	glfwSetKeyCallback(this->window, key_callback);
+	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+	glEnable(GL_DEPTH_TEST);
 	if (!this->initShaders())
 		return (0);
 	this->loadTextures();
 	this->getLocations();
 	this->buildProjectionMatrix(this->projMatrix, 53.13f, 1.0f, 30.0f);
-	this->cameraPos.set(5.0f, 0.0f, 0.0f);
+	this->cameraPos.set(0.0f, 0.0f, 0.0f);
 	this->cameraLookAt.set(0.0f, 0.0f, 0.0f);
 	this->setCamera(this->viewMatrix, this->cameraPos, this->cameraLookAt);
+	this->createAxes();
 	return (1);
+}
+
+void
+Core::renderAxes(void)
+{
+	// glDrawElements(GL_LINES, 3, GL_UNSIGNED_SHORT, 0);
+	glBindVertexArray(axesVao);
+	glBindBuffer(GL_ARRAY_BUFFER, axesVbo);
+	glDrawArrays(GL_LINES, 0, 6);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
 void
 Core::update(void)
 {
-
+	this->cameraPos.set(5.0f, 0.0f, 0.0f);
+	this->cameraLookAt.set(0.0f, 0.0f, 0.0f);
+	this->setCamera(this->viewMatrix, this->cameraPos, this->cameraLookAt);
 }
 
 void
@@ -383,6 +401,7 @@ Core::render(void)
 	glUseProgram(this->program);
 	glUniformMatrix4fv(this->projLoc, 1, GL_FALSE, this->projMatrix);
 	glUniformMatrix4fv(this->viewLoc, 1, GL_FALSE, this->viewMatrix);
+	this->renderAxes();
 	checkGlError(__FILE__, __LINE__);
 }
 
@@ -391,7 +410,7 @@ Core::loop(void)
 {
 	while (!glfwWindowShouldClose(this->window))
 	{
-		glClear(GL_COLOR_BUFFER_BIT);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		this->update();
 		this->render();
 		glfwSwapBuffers(this->window);
