@@ -45,7 +45,10 @@ readFile(char const *filename)
 			return (close(fd), (char *)printError("Failed to read file!"));
 		j = 0;
 		while (j < ret)
+		{
 			file[i + j] = buf[j];
+			j++;
+		}
 		i += ret;
 	}
 	file[i] = '\0';
