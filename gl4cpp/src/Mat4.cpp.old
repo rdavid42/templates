@@ -1,41 +1,7 @@
-#ifndef MAT4_HPP
-# define MAT4_HPP
-
-#include "Vec3.hpp"
+#include "Mat4.hpp"
 
 template<typename TYPE>
-class Mat4
-{
-public:
-	TYPE		val[16];
-
-//Mat4();
-//	~Mat4(void);
-	
-// 	void			set(TYPE const *val);
-// 	void			reset(void);
-// 	void			multiplyMatrix(Mat4<TYPE> mat);
-// 	void			setIdentityMatrix(int const &size);
-// 	void			setTranslationMatrix(Vec3<TYPE> val);
-// 	void			translateMatrix(Vec3<TYPE> val);
-// 	void			translateMatrix(Mat4<TYPE> translate);
-// 	void			setRotationMatrix(Vec3<TYPE> const &axis, float const &angle);
-// 	void			rotateMatrix(Vec3<TYPE> const &axis, float const &angle);
-// 	void			rotateMatrix(Mat4<TYPE> rotation);
-// 	void			setScaleMatrix(Vec3<TYPE> scale);
-// 	void			scaleMatrix(Vec3<TYPE> val);
-// 	void			scaleMatrix(Mat4<TYPE> scale);
-// 	Mat4<TYPE>		&operator=(Mat4<TYPE> const &rhs);
-// 	Mat4<TYPE>		operator*(Mat4<TYPE> const &rhs) const;
-// 	Mat4<TYPE>		operator-(Mat4<TYPE> const &rhs) const;
-// 	Mat4<TYPE>		&operator-=(Mat4<TYPE> const &rhs);
-// 	Mat4<TYPE>		operator+(Mat4<TYPE> const &rhs) const;
-// 	Mat4<TYPE>		&operator+=(Mat4<TYPE> const &rhs);
-// private:
-// 	Mat4(Mat4<TYPE> const &src);
-//
-
-Mat4()
+Mat4<TYPE>::Mat4()
 {
 	int		i;
 
@@ -43,21 +9,22 @@ Mat4()
 	while (i < 16)
 	{
 		this->val[i] = 0;
-		i++;
 	}
 	return ;
 }
 
-~Mat4(void)
+template<typename TYPE>
+Mat4<TYPE>::~Mat4(void)
 {
 	return ;
 }
 
+template<typename TYPE>
 void
-set(TYPE const *val)
+Mat4<TYPE>::set(TYPE const *val)
 {
 	int		i;
-	
+
 	i = 0;
 	while (i < 16)
 	{
@@ -67,8 +34,9 @@ set(TYPE const *val)
 	return ;
 }
 
+template<typename TYPE>
 void
-reset(void)
+Mat4<TYPE>::reset(void)
 {
 	int		i;
 
@@ -76,13 +44,13 @@ reset(void)
 	while (i < 16)
 	{
 		this->val[i] = 0;
-		++i;
 	}
 	return ;
 }
 
+template<typename TYPE>
 void
-multiplyMatrix(Mat4<TYPE> mat)
+Mat4<TYPE>::multiplyMatrix(Mat4<TYPE> mat)
 {
 	Mat4<TYPE>	res;
 	int			i;
@@ -107,24 +75,27 @@ multiplyMatrix(Mat4<TYPE> mat)
 		}
 		i++;
 	}
-	*this = res;
+	this = res;
 }
 
+template<typename TYPE>
 void
-setIdentityMatrix()
+Mat4<TYPE>::setIdentityMatrix(int const &size)
 {
 	int			i;
+	int	const	s2 = size * size;
 
 	i = -1;
-	while (i++, i < 16)
+	while (i++, i < s2)
 		this->val[i] = 0.0f;
 	i = -1;
-	while (i++, i < 4)
-		this->val[i + i * 4] = 1.0f;
+	while (i++, i < size)
+		this->val[i + i * size] = 1.0f;
 }
 
+template<typename TYPE>
 void
-setTranslationMatrix(Vec3<TYPE> val)
+Mat4<TYPE>::setTranslationMatrix(Vec3<TYPE> val)
 {
 	/*
 	1		0		0		0
@@ -133,33 +104,36 @@ setTranslationMatrix(Vec3<TYPE> val)
 	x		y		z		1
 	*/
 
-	this->setIdentityMatrix();
+	this->setIdentityMatrix(4);
 	this->val[12] = val.x;
 	this->val[13] = val.y;
 	this->val[14] = val.z;
 }
 
+template<typename TYPE>
 void
-translateMatrix(Vec3<TYPE> val)
+Mat4<TYPE>::translateMatrix(Vec3<TYPE> val)
 {
 	Mat4<TYPE>		translate;
 
 	translate.setTranslationMatrix(val);
-	*this = *this * translate;
+	this = this * translate;
 
 	return ;
 }
 
+template<typename TYPE>
 void
-translateMatrix(Mat4<TYPE> translate)
+Mat4<TYPE>::translateMatrix(Mat4<TYPE> translate)
 {
-	*this = *this * translate;
+	this = this * translate;
 
 	return ;
 }
 
+template<typename TYPE>
 void
-setRotationMatrix(Vec3<TYPE> &axis, float const &angle)
+Mat4<TYPE>::setRotationMatrix(Vec3<TYPE> const &axis, float const &angle)
 {
 	TYPE		s = sin(angle);
 	TYPE		c = cos(angle);
@@ -178,7 +152,7 @@ setRotationMatrix(Vec3<TYPE> &axis, float const &angle)
 	this->val[8] = oc * axis.z * axis.x - axis.y * s;
 	this->val[9] = oc * axis.y * axis.z + axis.x * s;
 	this->val[10] = oc * axis.z * axis.z + c;
-	this->val[11] = 0.0;
+	this->val[11]  = 0.0;
 	this->val[12] = 0.0;
 	this->val[13] = 0.0;
 	this->val[14] = 0.0;
@@ -187,28 +161,31 @@ setRotationMatrix(Vec3<TYPE> &axis, float const &angle)
 	return ;
 }
 
+template<typename TYPE>
 void
-rotateMatrix(Vec3<TYPE> const &axis, float const &angle)
+Mat4<TYPE>::rotateMatrix(Vec3<TYPE> const &axis, float const &angle)
 {
 	Mat4<TYPE>		rotation;
 
 	rotation.setRotationMatrix(axis, angle);
 
-	*this = *this * rotation;
+	this = this * rotation;
 
 	return ;
 }
 
+template<typename TYPE>
 void
-rotateMatrix(Mat4<TYPE> rotation)
+Mat4<TYPE>::rotateMatrix(Mat4<TYPE> rotation)
 {
-	*this = *this * rotation;
+	this = this * rotation;
 
 	return ;
 }
 
+template<typename TYPE>
 void
-setScaleMatrix(Vec3<TYPE> scale)
+Mat4<TYPE>::setScaleMatrix(Vec3<TYPE> scale)
 {
 	this->reset();
 
@@ -220,28 +197,31 @@ setScaleMatrix(Vec3<TYPE> scale)
 	return ;
 }
 
+template<typename TYPE>
 void
-scaleMatrix(Vec3<TYPE> val)
+Mat4<TYPE>::scaleMatrix(Vec3<TYPE> val)
 {
 	Mat4<TYPE>	scale;
 
 	scale.setScaleMatrix(val);
 
-	*this = *this * scale;
+	this = this * scale;
 
 	return ;
 }
 
+template<typename TYPE>
 void
-scaleMatrix(Mat4<TYPE> scale)
+Mat4<TYPE>::scaleMatrix(Mat4<TYPE> scale)
 {
-	*this = *this * scale;
+	this = this * scale;
 
 	return ;
 }
 
+template<typename TYPE>
 Mat4<TYPE> &
-operator=(Mat4<TYPE> const &rhs)
+Mat4<TYPE>::operator=(Mat4<TYPE> const &rhs)
 {
 	int		i;
 
@@ -257,8 +237,9 @@ operator=(Mat4<TYPE> const &rhs)
 	return (*this);
 }
 
+template<typename TYPE>
 Mat4<TYPE>
-operator*(Mat4<TYPE> const & rhs) const
+Mat4<TYPE>::operator*(Mat4<TYPE> const & rhs) const
 {
 	Mat4<TYPE>	res;
 	int			i;
@@ -286,8 +267,9 @@ operator*(Mat4<TYPE> const & rhs) const
 	return (res);
 }
 
+template<typename TYPE>
 Mat4<TYPE>
-operator-(Mat4<TYPE> const &rhs) const
+Mat4<TYPE>::operator-(Mat4<TYPE> const &rhs) const
 {
 	Mat4<TYPE> res;
 
@@ -302,8 +284,9 @@ operator-(Mat4<TYPE> const &rhs) const
 	return (res);
 }
 
+template<typename TYPE>
 Mat4<TYPE> &
-operator-=(Mat4<TYPE> const &rhs)
+Mat4<TYPE>::operator-=(Mat4<TYPE> const &rhs)
 {
 	int		i;
 
@@ -316,8 +299,9 @@ operator-=(Mat4<TYPE> const &rhs)
 	return (*this);
 }
 
+template<typename TYPE>
 Mat4<TYPE>
-operator+(Mat4<TYPE> const &rhs) const
+Mat4<TYPE>::operator+(Mat4<TYPE> const &rhs) const
 {
 	Mat4<TYPE> res;
 
@@ -332,8 +316,9 @@ operator+(Mat4<TYPE> const &rhs) const
 	return (res);
 }
 
+template<typename TYPE>
 Mat4<TYPE> &
-operator+=(Mat4<TYPE> const &rhs)
+Mat4<TYPE>::operator+=(Mat4<TYPE> const &rhs)
 {
 	int		i;
 
@@ -347,10 +332,6 @@ operator+=(Mat4<TYPE> const &rhs)
 }
 
 
-
-
-};
-
 template<typename TYPE>
 std::ostream &
 operator<<(std::ostream &o, Mat4<TYPE> const &mat)
@@ -359,21 +340,15 @@ operator<<(std::ostream &o, Mat4<TYPE> const &mat)
 
 	i = 0;
 	o << "Matrice : \n";
-	o << "|";
+	o << "| ";
 	while (i < 16)
 	{
-		o << " "<< mat.val[i];
-		if (i == 15)
-			o << "|\n";
-		else if (i % 4 == 3)
+		o << mat.val[i];
+		if (i % 4 == 0)
 			o << "|\n|";
 		++i;
 	}
 	o << std::endl;
 	return (o);
 }
-// template<typename TYPE>
-// std::ostream		&operator<<(std::ostream &o, Mat4<TYPE> const &mat);
 
-
-#endif
