@@ -1,5 +1,5 @@
 #version 410
-/*
+
 #define M_PI 3.1415926535897932384626433832795
 
 mat4		rotation_matrix(vec3 axis, float angle)
@@ -29,7 +29,7 @@ float		deg_to_rad(float x)
 {
 	return (x / 180.0 * M_PI);
 }
-*/
+
 uniform mat4				view_matrix;
 uniform mat4				proj_matrix;
 
@@ -40,7 +40,7 @@ out vec3 frag_color;
 
 void		main()
 {
-	gl_Position = vec4(position, 1.0);
-	// gl_Position = proj_matrix * view_matrix * vec4(position, 1.0);
+	// gl_Position = vec4(position, 1.0);
+	gl_Position = proj_matrix * view_matrix * vec4(position, 1.0);
 	frag_color = vert_color;
 }
