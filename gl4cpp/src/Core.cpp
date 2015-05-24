@@ -43,6 +43,26 @@ Core::loadTexture(char const *filename)
 	return (texture);
 }
 
+static void		printMatrix(float const *mat, char const *name)
+{
+	int				i;
+	int				j;
+
+	fprintf(stderr, "%s matrix:\n", name);
+	i = 0;
+	while (i < 4)
+	{
+		j = 0;
+		while (j < 4)
+		{
+			fprintf(stderr, "%f ", mat[i * 4 + j]);
+			j++;
+		}
+		fprintf(stderr, "\n");
+		i++;
+	}
+}
+
 void
 Core::setIdentityMatrix(float *mat, int const &size)
 {
@@ -83,6 +103,7 @@ Core::buildProjectionMatrix(float *proj, float const &fov,
 	proj[3 * 4 + 2] = (2.0f * far * near) / (near - far); // d
 	proj[2 * 4 + 3] = -1.0f; // e
 	proj[3 * 4 + 3] = 0.0f; // f
+	printMatrix(proj, "Projection");
 }
 
 void
@@ -179,6 +200,13 @@ Core::setCamera(float *view, Vec3<float> const &pos, Vec3<float> const &lookAt)
 	this->setViewMatrix(view, dir, right, up);
 	this->setTranslationMatrix(translation, -pos.x, -pos.y, -pos.z);
 	this->multiplyMatrix(view, translation);
+/*	std::cerr << "up: " << up << std::endl;
+	std::cerr << "right: " << right << std::endl;
+	std::cerr << "dir: " << dir << std::endl;
+	std::cerr << "lookAt: " << lookAt << std::endl;
+	std::cerr << "pos: " << pos << std::endl;
+	printMatrix(view, "View");
+	printMatrix(translation, "Translation");*/
 }
 
 int
@@ -310,12 +338,6 @@ Core::createAxes(void)
 		0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
 		0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f
 	};
-/*	static GLushort		axesIndices[6] =
-	{
-		0, 1,
-		0, 2,
-		0, 3
-	};*/
 
 	glGenVertexArrays(1, &axesVao);
 	glBindVertexArray(axesVao);
@@ -327,17 +349,12 @@ Core::createAxes(void)
 
 	// create pointer to vertices
 	glEnableVertexAttribArray(positionLoc);
-	glVertexAttribPointer(positionLoc, 3, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 3, (void *)0);
+	glVertexAttribPointer(positionLoc, 3, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 6, (void *)0);
 
 	// create pointer to colors
 	glEnableVertexAttribArray(colorLoc);
-	glVertexAttribPointer(colorLoc, 3, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 3, (void *)(sizeof(GLfloat) * 3));
-/*
-	// bind indices vbo
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, axesVbo[1]);
-	// create the indices
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLushort) * 6, axesIndices, GL_STATIC_DRAW);
-*/
+	glVertexAttribPointer(colorLoc, 3, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 6, (void *)(sizeof(GLfloat) * 3));
+
 	// check for errors
 	checkGlError(__FILE__, __LINE__);
 }
@@ -370,7 +387,7 @@ Core::init(void)
 	this->loadTextures();
 	this->getLocations();
 	this->buildProjectionMatrix(this->projMatrix, 53.13f, 1.0f, 30.0f);
-	this->cameraPos.set(0.0f, 0.0f, 0.0f);
+	this->cameraPos.set(5.0f, 5.0f, 5.0f);
 	this->cameraLookAt.set(0.0f, 0.0f, 0.0f);
 	this->setCamera(this->viewMatrix, this->cameraPos, this->cameraLookAt);
 	this->createAxes();
@@ -380,7 +397,6 @@ Core::init(void)
 void
 Core::renderAxes(void)
 {
-	// glDrawElements(GL_LINES, 3, GL_UNSIGNED_SHORT, 0);
 	glBindVertexArray(axesVao);
 	glBindBuffer(GL_ARRAY_BUFFER, axesVbo);
 	glDrawArrays(GL_LINES, 0, 6);
@@ -390,8 +406,6 @@ Core::renderAxes(void)
 void
 Core::update(void)
 {
-	this->cameraPos.set(5.0f, 0.0f, 0.0f);
-	this->cameraLookAt.set(0.0f, 0.0f, 0.0f);
 	this->setCamera(this->viewMatrix, this->cameraPos, this->cameraLookAt);
 }
 
