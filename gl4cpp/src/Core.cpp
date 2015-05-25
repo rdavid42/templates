@@ -330,9 +330,10 @@ Core::renderAxes(void)
 				glDrawArrays(GL_LINES, 0, 6);
 			mStack.pop();
 		mStack.pop();
+		mStack.translate(3.0f, 0.0f, 0.0f);
+		glUniformMatrix4fv(this->objLoc, 1, GL_FALSE, mStack.top().val);
+		glDrawArrays(GL_LINES, 0, 6);
 	mStack.pop();
-	glUniformMatrix4fv(this->objLoc, 1, GL_FALSE, mStack.top().val);
-	glDrawArrays(GL_LINES, 0, 6);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
