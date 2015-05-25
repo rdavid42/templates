@@ -307,8 +307,6 @@ Core::init(void)
 	this->cameraLookAt.set(0.0f, 0.0f, 0.0f);
 	this->setCamera(this->viewMatrix, this->cameraPos, this->cameraLookAt);
 	this->createAxes();
-	this->objectMatrix.setIdentity();
-	// this->objectMatrix.rotate(Vec3<float>(0, 0, 1), 45);
 	return (1);
 }
 
@@ -317,7 +315,23 @@ Core::renderAxes(void)
 {
 	glBindVertexArray(axesVao);
 	glBindBuffer(GL_ARRAY_BUFFER, axesVbo);
-	glUniformMatrix4fv(this->objLoc, 1, GL_FALSE, this->objectMatrix.val);
+	mStack.push();
+		mStack.rotate(45.0f, 0.0f, 0.0f, 1.0f);
+		glUniformMatrix4fv(this->objLoc, 1, GL_FALSE, mStack.top().val);
+		glDrawArrays(GL_LINES, 0, 6);
+		mStack.push();
+			mStack.translate(0.5f, 0.5f, 0.0f);
+			glUniformMatrix4fv(this->objLoc, 1, GL_FALSE, mStack.top().val);
+			glDrawArrays(GL_LINES, 0, 6);
+			mStack.push();
+				mStack.translate(0.5, 0.0f, 0.5f);
+				mStack.scale(2.0f, 2.0f, 2.0f);
+				glUniformMatrix4fv(this->objLoc, 1, GL_FALSE, mStack.top().val);
+				glDrawArrays(GL_LINES, 0, 6);
+			mStack.pop();
+		mStack.pop();
+	mStack.pop();
+	glUniformMatrix4fv(this->objLoc, 1, GL_FALSE, mStack.top().val);
 	glDrawArrays(GL_LINES, 0, 6);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 }

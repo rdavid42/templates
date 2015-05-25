@@ -14,7 +14,7 @@
 # include "Vec3.hpp"
 # include "Utils.hpp"
 # include "Bmp.hpp"
-# include "Mat4.hpp"
+# include "Mat4Stack.hpp"
 
 class Core
 {
@@ -29,11 +29,9 @@ public:
 	/*
 	** Matrices
 	*/
-/*	float					projMatrix[16];
-	float					viewMatrix[16];*/
+	Mat4Stack<float>		mStack;
 	Mat4<float>				projMatrix;
 	Mat4<float>				viewMatrix;
-	Mat4<float>				objectMatrix;
 
 	/*
 	** Camera

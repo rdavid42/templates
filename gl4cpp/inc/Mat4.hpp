@@ -123,8 +123,8 @@ public:
 	}
 
 	void
-	setRotation(float const &angle, TYPE const &x,
-				TYPE const &y, TYPE const &z)
+	setRotation(float const &angle, TYPE &x,
+				TYPE &y, TYPE &z)
 	{
 		TYPE		s = sin(angle);
 		TYPE		c = cos(angle);
@@ -153,12 +153,12 @@ public:
 	}
 
 	void
-	rotate(float const &angle, TYPE const &x,
-			TYPE const &y, TYPE const &z)
+	rotate(float const &angle, TYPE &x,
+			TYPE &y, TYPE &z)
 	{
 		Mat4<TYPE>		rotation;
 
-		rotation.setRotation(x, y, z, angle);
+		rotation.setRotation(angle, x, y, z);
 		*this = *this * rotation;
 	}
 

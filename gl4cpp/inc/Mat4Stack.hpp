@@ -5,12 +5,12 @@
 # include "Mat4.hpp"
 
 template<typename T>
-class MatStack
+class Mat4Stack
 {
 public:
 	std::stack<Mat4<T>>			stack;
 
-	MatStack(void)
+	Mat4Stack(void)
 	{
 		Mat4<T>		mat;
 
@@ -18,7 +18,7 @@ public:
 		stack.push(mat);
 	}
 
-	~MatStack(void)
+	~Mat4Stack(void)
 	{
 	}
 
@@ -35,26 +35,28 @@ public:
 		stack.pop();
 	}
 
-	void			rotate(float const &angle, float const &x,
-							float const &y, float const &z)
+	Mat4<T> &		top(void)
+	{
+		return (stack.top());
+	}
+
+	void			rotate(float const &angle, float x, float y, float z)
 	{
 		stack.top().rotate(angle, x, y, z);
 	}
 
-	void			translate(void)
+	void			translate(T const &x, T const &y, T const &z)
 	{
-		stack.top().translate();
+		stack.top().translate(x, y, z);
 	}
 
-	void			scale(void)
+	void			scale(T const &x, T const &y, T const &z)
 	{
-
+		stack.top().scale(x, y, z);
 	}
-
-	MatStack<
 
 private:
-	MatStack(MatStack const &src);
+	Mat4Stack(Mat4Stack const &src);
 };
 
 #endif
