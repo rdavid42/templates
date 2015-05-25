@@ -1,8 +1,6 @@
 #ifndef MAT4_HPP
 # define MAT4_HPP
 
-#include "Vec3.hpp"
-
 template<typename TYPE>
 class Mat4
 {
@@ -19,12 +17,10 @@ public:
 			this->val[i] = 0;
 			i++;
 		}
-		return ;
 	}
 
 	~Mat4(void)
 	{
-		return ;
 	}
 
 	void
@@ -38,7 +34,6 @@ public:
 			this->val[i] = val[i];
 			i++;
 		}
-		return ;
 	}
 
 	void
@@ -52,7 +47,6 @@ public:
 			this->val[i] = 0;
 			++i;
 		}
-		return ;
 	}
 
 	void
@@ -98,7 +92,7 @@ public:
 	}
 
 	void
-	setTranslation(Vec3<TYPE> val)
+	setTranslation(TYPE const &x, TYPE const &y, TYPE const &z)
 	{
 		/*
 		1		0		0		0
@@ -108,99 +102,96 @@ public:
 		*/
 
 		this->setIdentity();
-		this->val[12] = val.x;
-		this->val[13] = val.y;
-		this->val[14] = val.z;
+		this->val[12] = x;
+		this->val[13] = y;
+		this->val[14] = z;
 	}
 
 	void
-	translate(Vec3<TYPE> val)
+	translate(TYPE const &x, TYPE const &y, TYPE const &z)
 	{
 		Mat4<TYPE>		translate;
 
-		translate.setTranslation(val);
+		translate.setTranslation(x, y, z);
 		*this = *this * translate;
-		return ;
 	}
 
 	void
 	translate(Mat4<TYPE> translate)
 	{
 		*this = *this * translate;
-		return ;
 	}
 
 	void
-	setRotation(Vec3<TYPE> axis, float const &angle)
+	setRotation(float const &angle, TYPE const &x,
+				TYPE const &y, TYPE const &z)
 	{
 		TYPE		s = sin(angle);
 		TYPE		c = cos(angle);
 		TYPE		oc = 1.0 - c;
-		
-		axis.normalize();
-		this->val[0] = oc * axis.x * axis.x + c;
-		this->val[1] = oc * axis.x * axis.y - axis.z * s;
-		this->val[2] = oc * axis.z * axis.x + axis.y * s;
+		TYPE const	h = sqrt(x * x + y * y + z * z);
+
+		x /= h;
+		y /= h;
+		z /= h;
+		this->val[0] = oc * x * x + c;
+		this->val[1] = oc * x * y - z * s;
+		this->val[2] = oc * z * x + y * s;
 		this->val[3] = 0.0;
-		this->val[4] = oc * axis.x * axis.y + axis.z * s;
-		this->val[5] = oc * axis.y * axis.y + c;
-		this->val[6] = oc * axis.y * axis.z - axis.x * s;
+		this->val[4] = oc * x * y + z * s;
+		this->val[5] = oc * y * y + c;
+		this->val[6] = oc * y * z - x * s;
 		this->val[7] = 0.0;
-		this->val[8] = oc * axis.z * axis.x - axis.y * s;
-		this->val[9] = oc * axis.y * axis.z + axis.x * s;
-		this->val[10] = oc * axis.z * axis.z + c;
+		this->val[8] = oc * z * x - y * s;
+		this->val[9] = oc * y * z + x * s;
+		this->val[10] = oc * z * z + c;
 		this->val[11] = 0.0;
 		this->val[12] = 0.0;
 		this->val[13] = 0.0;
 		this->val[14] = 0.0;
 		this->val[15] = 1.0;
-		return ;
 	}
 
 	void
-	rotate(Vec3<TYPE> axis, float const &angle)
+	rotate(float const &angle, TYPE const &x,
+			TYPE const &y, TYPE const &z)
 	{
 		Mat4<TYPE>		rotation;
 
-		rotation.setRotation(axis, angle);
+		rotation.setRotation(x, y, z, angle);
 		*this = *this * rotation;
-		return ;
 	}
 
 	void
 	rotate(Mat4<TYPE> rotation)
 	{
 		*this = *this * rotation;
-		return ;
 	}
 
 	void
-	setScale(Vec3<TYPE> scale)
+	setScale(TYPE const &x, TYPE const &y, TYPE const &z)
 	{
 		this->reset();
 
-		this->val[0] = scale.x;
-		this->val[5] = scale.y;
-		this->val[10] = scale.z;
+		this->val[0] = x;
+		this->val[5] = y;
+		this->val[10] = z;
 		this->val[15] = 1;
-		return ;
 	}
 
 	void
-	scale(Vec3<TYPE> val)
+	scale(TYPE const &x, TYPE const &y, TYPE const &z)
 	{
 		Mat4<TYPE>	scale;
 
-		scale.setScale(val);
+		scale.setScale(x, y, z);
 		*this = *this * scale;
-		return ;
 	}
 
 	void
 	scale(Mat4<TYPE> scale)
 	{
 		*this = *this * scale;
-		return ;
 	}
 
 	Mat4<TYPE> &

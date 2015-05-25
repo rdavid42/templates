@@ -33,6 +33,7 @@ public:
 	float					viewMatrix[16];*/
 	Mat4<float>				projMatrix;
 	Mat4<float>				viewMatrix;
+	Mat4<float>				objectMatrix;
 
 	/*
 	** Camera
@@ -52,6 +53,7 @@ public:
 	*/
 	GLuint					projLoc;
 	GLuint					viewLoc;
+	GLuint					objLoc;
 
 	GLuint					positionLoc;
 	GLuint					colorLoc;

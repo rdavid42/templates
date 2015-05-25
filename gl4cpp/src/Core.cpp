@@ -120,7 +120,7 @@ Core::setCamera(Mat4<float> &view, Vec3<float> const &pos, Vec3<float> const &lo
 	up.crossProduct(right, dir);
 	up.normalize();
 	this->setViewMatrix(view, dir, right, up);
-	translation.setTranslation(-pos);
+	translation.setTranslation(-pos.x, -pos.y, -pos.z);
 	view.multiply(translation);
 }
 
@@ -242,6 +242,7 @@ Core::getLocations(void)
 	this->colorLoc = glGetAttribLocation(this->program, "vert_color");
 	this->projLoc = glGetUniformLocation(this->program, "proj_matrix");
 	this->viewLoc = glGetUniformLocation(this->program, "view_matrix");
+	this->objLoc = glGetUniformLocation(this->program, "object_matrix");
 }
 
 void
@@ -306,7 +307,8 @@ Core::init(void)
 	this->cameraLookAt.set(0.0f, 0.0f, 0.0f);
 	this->setCamera(this->viewMatrix, this->cameraPos, this->cameraLookAt);
 	this->createAxes();
-	// this->projMatrix.rotate(Vec3<float>(0, 0, 0), 45);
+	this->objectMatrix.setIdentity();
+	// this->objectMatrix.rotate(Vec3<float>(0, 0, 1), 45);
 	return (1);
 }
 
@@ -315,6 +317,7 @@ Core::renderAxes(void)
 {
 	glBindVertexArray(axesVao);
 	glBindBuffer(GL_ARRAY_BUFFER, axesVbo);
+	glUniformMatrix4fv(this->objLoc, 1, GL_FALSE, this->objectMatrix.val);
 	glDrawArrays(GL_LINES, 0, 6);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
