@@ -200,13 +200,6 @@ Core::setCamera(float *view, Vec3<float> const &pos, Vec3<float> const &lookAt)
 	this->setViewMatrix(view, dir, right, up);
 	this->setTranslationMatrix(translation, -pos.x, -pos.y, -pos.z);
 	this->multiplyMatrix(view, translation);
-/*	std::cerr << "up: " << up << std::endl;
-	std::cerr << "right: " << right << std::endl;
-	std::cerr << "dir: " << dir << std::endl;
-	std::cerr << "lookAt: " << lookAt << std::endl;
-	std::cerr << "pos: " << pos << std::endl;
-	printMatrix(view, "View");
-	printMatrix(translation, "Translation");*/
 }
 
 int
