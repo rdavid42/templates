@@ -109,6 +109,12 @@ public:
 	}
 
 	Vec3<TYPE>
+	operator-() const
+	{
+		return (Vec3<TYPE>(-this->x, -this->y, -this->z));
+	}
+
+	Vec3<TYPE>
 	operator*(Vec3<TYPE> const &rhs) const
 	{
 		return (Vec3<TYPE>(this->x * rhs.x, this->y * rhs.y, this->z * rhs.z));

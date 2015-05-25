@@ -56,7 +56,7 @@ public:
 	}
 
 	void
-	multiplyMatrix(Mat4<TYPE> mat)
+	multiply(Mat4<TYPE> mat)
 	{
 		Mat4<TYPE>	res;
 		int			i;
@@ -85,7 +85,7 @@ public:
 	}
 
 	void
-	setIdentityMatrix()
+	setIdentity(void)
 	{
 		int			i;
 
@@ -98,7 +98,7 @@ public:
 	}
 
 	void
-	setTranslationMatrix(Vec3<TYPE> val)
+	setTranslation(Vec3<TYPE> val)
 	{
 		/*
 		1		0		0		0
@@ -107,38 +107,37 @@ public:
 		x		y		z		1
 		*/
 
-		this->setIdentityMatrix();
+		this->setIdentity();
 		this->val[12] = val.x;
 		this->val[13] = val.y;
 		this->val[14] = val.z;
 	}
 
 	void
-	translateMatrix(Vec3<TYPE> val)
+	translate(Vec3<TYPE> val)
 	{
 		Mat4<TYPE>		translate;
 
-		translate.setTranslationMatrix(val);
+		translate.setTranslation(val);
 		*this = *this * translate;
 		return ;
 	}
 
 	void
-	translateMatrix(Mat4<TYPE> translate)
+	translate(Mat4<TYPE> translate)
 	{
 		*this = *this * translate;
 		return ;
 	}
 
 	void
-	setRotationMatrix(Vec3<TYPE> &axis, float const &angle)
+	setRotation(Vec3<TYPE> axis, float const &angle)
 	{
 		TYPE		s = sin(angle);
 		TYPE		c = cos(angle);
 		TYPE		oc = 1.0 - c;
 		
 		axis.normalize();
-
 		this->val[0] = oc * axis.x * axis.x + c;
 		this->val[1] = oc * axis.x * axis.y - axis.z * s;
 		this->val[2] = oc * axis.z * axis.x + axis.y * s;
@@ -159,25 +158,24 @@ public:
 	}
 
 	void
-	rotateMatrix(Vec3<TYPE> const &axis, float const &angle)
+	rotate(Vec3<TYPE> axis, float const &angle)
 	{
 		Mat4<TYPE>		rotation;
 
-		rotation.setRotationMatrix(axis, angle);
-
+		rotation.setRotation(axis, angle);
 		*this = *this * rotation;
 		return ;
 	}
 
 	void
-	rotateMatrix(Mat4<TYPE> rotation)
+	rotate(Mat4<TYPE> rotation)
 	{
 		*this = *this * rotation;
 		return ;
 	}
 
 	void
-	setScaleMatrix(Vec3<TYPE> scale)
+	setScale(Vec3<TYPE> scale)
 	{
 		this->reset();
 
@@ -189,17 +187,17 @@ public:
 	}
 
 	void
-	scaleMatrix(Vec3<TYPE> val)
+	scale(Vec3<TYPE> val)
 	{
 		Mat4<TYPE>	scale;
 
-		scale.setScaleMatrix(val);
+		scale.setScale(val);
 		*this = *this * scale;
 		return ;
 	}
 
 	void
-	scaleMatrix(Mat4<TYPE> scale)
+	scale(Mat4<TYPE> scale)
 	{
 		*this = *this * scale;
 		return ;
@@ -309,6 +307,12 @@ public:
 			++i;
 		}
 		return (*this);
+	}
+
+	TYPE &
+	operator[](int const &i)
+	{
+		return (val[i]);
 	}
 };
 

@@ -14,6 +14,7 @@
 # include "Vec3.hpp"
 # include "Utils.hpp"
 # include "Bmp.hpp"
+# include "Mat4.hpp"
 
 class Core
 {
@@ -28,8 +29,10 @@ public:
 	/*
 	** Matrices
 	*/
-	float					projMatrix[16];
-	float					viewMatrix[16];
+/*	float					projMatrix[16];
+	float					viewMatrix[16];*/
+	Mat4<float>				projMatrix;
+	Mat4<float>				viewMatrix;
 
 	/*
 	** Camera
@@ -88,15 +91,11 @@ public:
 	void					renderAxes(void);
 
 	/* matrices */
-	void					multiplyMatrix(float *a, float const *b);
-	void					setTranslationMatrix(float *translation, float const &x,
-												float const &y, float const &z);
-	void					setViewMatrix(float *view, Vec3<float> const &dir,
+	void					setViewMatrix(Mat4<float> &view, Vec3<float> const &dir,
 										Vec3<float> const &right, Vec3<float> const &up);
-	void					setCamera(float *view, Vec3<float> const &pos, Vec3<float> const &lookAt);
-	void					buildProjectionMatrix(float *proj, float const &fov,
+	void					setCamera(Mat4<float> &view, Vec3<float> const &pos, Vec3<float> const &lookAt);
+	void					buildProjectionMatrix(Mat4<float> &proj, float const &fov,
 												float const &near, float const &far);
-	void					setIdentityMatrix(float *mat, int const &size);
 
 	Core					&operator=(Core const &rhs);
 

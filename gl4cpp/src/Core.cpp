@@ -43,42 +43,8 @@ Core::loadTexture(char const *filename)
 	return (texture);
 }
 
-static void		printMatrix(float const *mat, char const *name)
-{
-	int				i;
-	int				j;
-
-	fprintf(stderr, "%s matrix:\n", name);
-	i = 0;
-	while (i < 4)
-	{
-		j = 0;
-		while (j < 4)
-		{
-			fprintf(stderr, "%f ", mat[i * 4 + j]);
-			j++;
-		}
-		fprintf(stderr, "\n");
-		i++;
-	}
-}
-
 void
-Core::setIdentityMatrix(float *mat, int const &size)
-{
-	int				i;
-	int const		s2 = size * size;
-
-	i = -1;
-	while (i++, i < s2)
-		mat[i] = 0.0f;
-	i = -1;
-	while (i++, i < size)
-		mat[i + i * size] = 1.0f;
-}
-
-void
-Core::buildProjectionMatrix(float *proj, float const &fov,
+Core::buildProjectionMatrix(Mat4<float> &proj, float const &fov,
 							float const &near, float const &far)
 {
 	float const			f = 1.0f / tan(fov * (M_PI / 360.0));
@@ -90,7 +56,7 @@ Core::buildProjectionMatrix(float *proj, float const &fov,
 	0 0 1 0
 	0 0 0 1
 	*/
-	this->setIdentityMatrix(proj, 4);
+	proj.setIdentity();
 	/*
 	a 0 0 0
 	0 b e 0
@@ -103,11 +69,11 @@ Core::buildProjectionMatrix(float *proj, float const &fov,
 	proj[3 * 4 + 2] = (2.0f * far * near) / (near - far); // d
 	proj[2 * 4 + 3] = -1.0f; // e
 	proj[3 * 4 + 3] = 0.0f; // f
-	printMatrix(proj, "Projection");
+	std::cerr << proj << std::endl;
 }
 
 void
-Core::setViewMatrix(float *view, Vec3<float> const &dir,
+Core::setViewMatrix(Mat4<float> &view, Vec3<float> const &dir,
 					Vec3<float> const &right, Vec3<float> const &up)
 {
 	/*
@@ -139,56 +105,12 @@ Core::setViewMatrix(float *view, Vec3<float> const &dir,
 }
 
 void
-Core::setTranslationMatrix(float *translation, float const &x,
-							float const &y, float const &z)
-{
-	/*
-	1		0		0		0
-	0		1		0		0
-	0		0		1		0
-	x		y		z		1
-	*/
-	this->setIdentityMatrix(translation, 4);
-	translation[12] = x;
-	translation[13] = y;
-	translation[14] = z;
-}
-
-void
-Core::multiplyMatrix(float *a, float const *b)
-{
-	float		res[16];
-	int			i;
-	int			j;
-	int			k;
-
-	i = 0;
-	while (i < 4)
-	{
-		j = 0;
-		while (j < 4)
-		{
-			res[j * 4 + i] = 0.0f;
-			k = 0;
-			while (k < 4)
-			{
-				res[j * 4 + i] += a[k * 4 + i] * b[j * 4 + k];
-				k++;
-			}
-			j++;
-		}
-		i++;
-	}
-	memcpy(a, res, sizeof(float) * 16);
-}
-
-void
-Core::setCamera(float *view, Vec3<float> const &pos, Vec3<float> const &lookAt)
+Core::setCamera(Mat4<float> &view, Vec3<float> const &pos, Vec3<float> const &lookAt)
 {
 	Vec3<float>		dir;
 	Vec3<float>		right;
 	Vec3<float>		up;
-	float			translation[16];
+	Mat4<float>		translation;
 
 	up.set(0.0f, 1.0f, 0.0f);
 	dir.set(lookAt - pos);
@@ -198,8 +120,8 @@ Core::setCamera(float *view, Vec3<float> const &pos, Vec3<float> const &lookAt)
 	up.crossProduct(right, dir);
 	up.normalize();
 	this->setViewMatrix(view, dir, right, up);
-	this->setTranslationMatrix(translation, -pos.x, -pos.y, -pos.z);
-	this->multiplyMatrix(view, translation);
+	translation.setTranslation(-pos);
+	view.multiply(translation);
 }
 
 int
@@ -384,6 +306,7 @@ Core::init(void)
 	this->cameraLookAt.set(0.0f, 0.0f, 0.0f);
 	this->setCamera(this->viewMatrix, this->cameraPos, this->cameraLookAt);
 	this->createAxes();
+	// this->projMatrix.rotate(Vec3<float>(0, 0, 0), 45);
 	return (1);
 }
 
@@ -406,8 +329,8 @@ void
 Core::render(void)
 {
 	glUseProgram(this->program);
-	glUniformMatrix4fv(this->projLoc, 1, GL_FALSE, this->projMatrix);
-	glUniformMatrix4fv(this->viewLoc, 1, GL_FALSE, this->viewMatrix);
+	glUniformMatrix4fv(this->projLoc, 1, GL_FALSE, this->projMatrix.val);
+	glUniformMatrix4fv(this->viewLoc, 1, GL_FALSE, this->viewMatrix.val);
 	this->renderAxes();
 	checkGlError(__FILE__, __LINE__);
 }
